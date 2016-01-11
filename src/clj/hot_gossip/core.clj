@@ -1,0 +1,1 @@
+(ns hot-gossip.core)
