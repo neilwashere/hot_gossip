@@ -6,3 +6,16 @@
  :name
  (fn [db]
    (reaction (:name @db))))
+
+(re-frame/register-sub
+ :ws/connected
+ (fn [db]
+   (reaction (:ws/connected @db))))
+
+(re-frame/register-sub
+ :topic
+ (fn [db [_ topic]]
+   (let [topic (keyword topic)]
+     (reaction (-> @db
+                   :topics
+                   topic)))))
