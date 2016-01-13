@@ -1,6 +1,7 @@
 (ns hot-gossip.subs
     (:require-macros [reagent.ratom :refer [reaction]])
-    (:require [re-frame.core :as re-frame]))
+    (:require [re-frame.core :as re-frame]
+              [taoensso.encore :as encore :refer [debugf]]))
 
 (re-frame/register-sub
  :name
@@ -20,7 +21,7 @@
 (re-frame/register-sub
  :topic
  (fn [db [_ topic]]
-   (let [topic (keyword topic)]
-     (reaction (-> @db
-                   :topics
-                   topic)))))
+   (debugf "looking for topic %s" topic)
+   (reaction (-> @db
+                 :topics
+                 topic))))
