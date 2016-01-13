@@ -5,3 +5,4 @@
 out
 .nrepl-port
 .lein-repl-history
+.lein-env

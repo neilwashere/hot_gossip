@@ -4,7 +4,8 @@
               [hot-gossip.handlers]
               [hot-gossip.subs]
               [hot-gossip.views :as views]
-              [hot-gossip.config :as config]))
+              [hot-gossip.config :as config]
+              [hot-gossip.ws :as ws]))
 
 (when config/debug?
   (println "dev mode"))
@@ -13,6 +14,7 @@
   (reagent/render [views/main-panel]
                   (.getElementById js/document "app")))
 
-(defn ^:export init [] 
+(defn ^:export init! []
   (re-frame/dispatch-sync [:initialize-db])
-  (mount-root))
+  (mount-root)
+  (ws/start-router!))

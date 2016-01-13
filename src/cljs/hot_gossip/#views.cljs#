@@ -1,6 +1,12 @@
-(ns hot-gossip.views
+ (ns hot-gossip.views
   (:require [re-frame.core :as re-frame]
             [reagent.core :as r]))
+
+(defn get-val [id]
+  (.-value (.getElementById js/document id)))
+
+
+
 
 (defn topic [topic]
   (let [messages (re-frame/subscribe [:topic topic])]
@@ -27,7 +33,7 @@
                              :on-change #(reset! topic (-> % .-target .-value))}]
      [:button#btn-register
       {:type "button"
-       :on-click #(re-frame/dispatch [:ws/register-topic (keyword @topic)])}
+       :on-click #(re-frame/dispatch [:register-topic @topic])}
       "Listen!"]]))
 
 (defn main-panel []

@@ -13,6 +13,11 @@
    (reaction (:ws/connected @db))))
 
 (re-frame/register-sub
+ :topics
+ (fn [db]
+   (reaction (:topics @db))))
+
+(re-frame/register-sub
  :topic
  (fn [db [_ topic]]
    (let [topic (keyword topic)]

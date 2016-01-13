@@ -16,29 +16,70 @@
 
   :min-lein-version "2.5.3"
 
+  :ring {:handler hot_gossip.handler/app
+         :uberwar-name "hot_gossip.war"}
+
+  :main hot-gossip.server
+
   :source-paths ["src/clj"]
 
-  :plugins [[lein-cljsbuild "1.1.1"]
-            [lein-figwheel "0.5.0-2"]]
+  :uberjar-name "hot_gossip.jar"
 
-  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+  :plugins [[lein-environ "1.0.1"]
+            [lein-asset-minifier "0.2.2"]]
 
-  :figwheel {:css-dirs ["resources/public/css"]
-             :ring-handler hot_gossip.handler/app}
 
-  :cljsbuild {:builds [{:id "dev"
-                        :source-paths ["src/cljs"]
-                        :figwheel {:on-jsload "hot_gossip.core/mount-root"}
-                        :compiler {:main hot_gossip.core
-                                   :output-to "resources/public/js/compiled/app.js"
-                                   :output-dir "resources/public/js/compiled/out"
-                                   :asset-path "js/compiled/out"
-                                   :source-map-timestamp true}}
+  :clean-targets ^{:protect false} [:target-path
+                                    [:cljsbuild :builds :app :compiler :output-dir]
+                                    [:cljsbuild :builds :app :compiler :output-to]]
 
-                       {:id "min"
-                        :source-paths ["src/cljs"]
-                        :compiler {:main hot_gossip.core
-                                   :output-to "resources/public/js/compiled/app.js"
-                                   :optimizations :advanced
-                                   :closure-defines {goog.DEBUG false}
-                                   :pretty-print false}}]})
+
+  :minify-assets {:assets {"resources/public/css/site.min.css"
+                           "resources/public/css/site.css"}}
+
+  :cljsbuild {:builds {:app {:source-paths ["src/cljs"]
+                             :compiler {:output-to     "resources/public/js/app.js"
+                                        :output-dir    "resources/public/js/out"
+                                        :asset-path   "js/out"
+                                        :optimizations :none
+                                        :pretty-print  true}}}}
+
+
+  :profiles {:dev {:repl-options {:init-ns hot-gossip.repl}
+
+                   :dependencies [[ring/ring-mock "0.3.0"]
+                                  [ring/ring-devel "1.4.0"]
+                                  [org.clojure/tools.nrepl "0.2.11"]
+                                  [pjstadig/humane-test-output "0.7.0"]]
+
+                   :source-paths ["env/dev/clj"]
+
+                   :plugins [[lein-figwheel "0.5.0-2"]
+                             [lein-cljsbuild "1.0.6"]]
+
+                   :injections [(require 'pjstadig.humane-test-output)
+                                (pjstadig.humane-test-output/activate!)]
+
+                   :figwheel {:http-server-root "public"
+                              :server-port 3449
+                              :nrepl-port 7002
+                              :css-dirs ["resources/public/css"]
+                              :ring-handler hot-gossip.handler/app}
+
+                   :env {:dev true}
+
+                   :cljsbuild {:builds {:app {:source-paths ["env/dev/cljs"]
+                                              :compiler {:main "hot-gossip.dev"
+                                                         :source-map true}}}}}
+
+             :uberjar {:hooks [leiningen.cljsbuild minify-assets.plugin/hooks]
+                       :env {:production true}
+                       :aot :all
+                       :omit-source true
+                       :cljsbuild {:jar true
+                                   :builds {:app
+                                             {:source-paths ["env/prod/cljs"]
+                                              :compiler
+                                              {:optimizations :advanced
+                                               :closure-defines {goog.DEBUG false}
+                                               :pretty-print false}}}}}})
