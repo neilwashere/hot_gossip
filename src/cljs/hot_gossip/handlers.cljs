@@ -13,7 +13,7 @@
  :ws/register-topic
  (fn [db [_  topic]]
    (when-not (-> db :topics topic)
-     (ws/chsk-send! [:topic/register- topic])
+     (ws/chsk-send! [:topic/register topic])
      (assoc-in db [:topics topic] []))))
 
 (re-frame/register-handler

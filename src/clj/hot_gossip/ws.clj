@@ -18,7 +18,27 @@
   (doseq [uid (:any @connected-uids)]
     (chsk-send! uid data)))
 
-(defonce shared-db (atom {}))
+(defonce shared-db (atom {:topics {}}))
+
+(defn topic-stream [topic]
+  (tubelines/consumer topic "gossip" {:zookeeper-address "localhost:2181"
+                                      :schema-registry-url "http://localhost:8081"}))
+
+(defn topic-whisperer [topic-stream ref path]
+  (manifold/consume topic-stream (fn [event]
+                                   (doseq [uid (get-in @ref path)]
+                                     (chsk-send! uid [:msg event])))))
+
+; TODO - refactor
+(defn register [uid topic]
+  (when-not (-> @shared-db :topics topic)
+    (swap! shared-db #(assoc-in %1 [:topics topic] [])))
+  (when-not (->> @shared-db
+                 :topics
+                 topic
+                 (some #{uid}))
+    (swap! shared-db
+           #(update-in %1 [:topics topic] conj uid))))
 
 (defmulti event-msg-handler :id)
 
@@ -33,13 +53,11 @@
   ; do something here?
   )
 
-(defmethod event-msg-handler :kafka/watch
-  ; Clients register an interest in receiving events from a topic
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (println "received a watch request here " ev-msg)
-  ; TODO - add the logic to register a new topic or listen to an existing one
+(defmethod event-msg-handler :topic/register
+  [{:keys [uid ?data]}]
+  (println "received registration request from " uid " to listen for " ?data)
+                                        ; do something here?
   )
-
 
 (defonce router (atom nil))
 (defn stop-router! [] (when-let [stop-f @router] (stop-f)))
