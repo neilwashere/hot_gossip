@@ -12,7 +12,9 @@
                  [environ "1.0.1"]
                  [http-kit "2.1.19"]
                  [com.taoensso/sente "1.7.0"]
-                 [prone "1.0.0"]]
+                 [prone "1.0.0"]
+                 [tubelines "0.10.3"]
+                 [manifold "0.1.1"]]
 
   :min-lein-version "2.5.3"
 

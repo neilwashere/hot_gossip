@@ -21,3 +21,9 @@
  (fn [db [_ connected?]]
    (if connected? (ws/chsk-send! [:state/sync]))
    (assoc db :ws/connected connected?)))
+
+(re-frame/register-handler
+ :topic/event
+ (fn [db [_ event]]
+   (debugf "got topic %s" event)
+   (update-in db [:topics (:topic event)] conj (:data event))))

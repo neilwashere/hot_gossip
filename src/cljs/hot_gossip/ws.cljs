@@ -34,7 +34,13 @@
 
 (defmethod event-msg-handler :chsk/recv
   [{:as ev-msg :keys [?data]}]
+  (debugf "got :chsk/recv")
     (re-frame/dispatch ?data))
+
+(defmethod event-msg-handler :topic/recv
+  [{:as ev-msg :keys [?data]}]
+  (debugf "got :topic/recv")
+  (re-frame/dispatch ?data))
 
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
   (event-msg-handler ev-msg))
